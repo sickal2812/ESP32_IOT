@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <meta charset="utf-8">
+   <title> Clean trash</title>
+   <meta http-equiv="Compatible" content="no-cache"/>
+   <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=d9c4871d49fbb39b2d5222ece525fe65"></script>
+   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+</head>
+
+<body>
+   <META HTTP-EQUIV="refresh" CONTENT="5">
+   <div id="map" style="width:1300px;height:1000px;"></div>
+   <script>
+	  //<META HTTP-EQUIV="refresh" CONTENT="10">
+      var mapContainer = document.getElementById('map'), // 지도를 표시할 div 
+          mapOption = {
+              center: new kakao.maps.LatLng(37.60010125287366, 126.86477091593595), // 지도의 중심좌표
+              level: 9, // 지도의 확대 레벨
+              mapTypeId : kakao.maps.MapTypeId.ROADMAP // 지도종류
+          }; 
+
+      // 지도를 생성한다 
+      var map = new kakao.maps.Map(mapContainer, mapOption);
+
+      // 지도에 확대 축소 컨트롤을 생성한다
+      var zoomControl = new kakao.maps.ZoomControl();
+
+      // 지도의 우측에 확대 축소 컨트롤을 추가한다
+      map.addControl(zoomControl, kakao.maps.ControlPosition.RIGHT);
+
+      // 지도 클릭 이벤트를 등록한다 (좌클릭 : click, 우클릭 : rightclick, 더블클릭 : dblclick)
+      kakao.maps.event.addListener(map, 'click', function (mouseEvent) {
+         console.log('지도에서 클릭한 위치의 좌표는 ' + mouseEvent.latLng.toString() + ' 입니다.');
+      });   
+
+      // 지도 드래깅 이벤트를 등록한다 (드래그 시작 : dragstart, 드래그 종료 : dragend)
+      kakao.maps.event.addListener(map, 'drag', function () {
+         var message = '지도를 드래그 하고 있습니다. ' + 
+                     '지도의 중심 좌표는 ' + map.getCenter().toString() +' 입니다.';
+         console.log(message);
+	  });
+
+	var imageSrc_full = './imgsrc/full.png' // 마커이미지의 주소입니다
+	var imageSrc_notfull = './imgsrc/notfull.png' 
+    imageSize = new kakao.maps.Size(64, 69), // 마커이미지의 크기입니다
+    imageOption = {offset: new kakao.maps.Point(27, 69)}; // 마커이미지의 옵션입니다. 마커의 좌표와 일치시킬 이미지 안에서의 좌표를 설정합니다.
+
+
+	// ip변경
+	var position = 
+	[[37.710216, 126.826349," ","쓰레기장"],
+	[37.701653, 126.900892,"unfull","안일훈쓰레기통","http://210.179.101.167"],
+	[37.480919, 126.952716,"unfull","이지원쓰레기통","https://img3.tmon.kr/cdn3/deals/2019/04/30/2020646746/2020646746_front_18fbe619d8.jpg"],
+	[37.481592, 126.794468,"unfull","전예림쓰레기통","https://img3.tmon.kr/cdn3/deals/2019/04/30/2020646746/2020646746_front_18fbe619d8.jpg"],
+	[37.580819, 126.902716,"full","이효중쓰레기통","https://img3.tmon.kr/cdn3/deals/2019/04/30/2020646746/2020646746_front_18fbe619d8.jpg"]];
+
+	var xhr = new XMLHttpRequest();
+	xhr.onreadystatechange = function() { // 요청에 대한 콜백
+  		if (xhr.readyState === xhr.DONE) { // 요청이 완료되면
+    		if (xhr.status === 200 || xhr.status === 201) {
+				  var xin = JSON.stringify(xhr.responseText)
+				  console.log(xin);
+
+				  for(var i =1; i<position.length; i++) {
+					if(xin.includes(i+'notfull')) {
+						position[i][2] = "notfull";
+				  	} else {
+						position[i][2] = "full";
+					}
+					console.log(position[i]);  
+				  }
+
+				  //if(xin.includes('1notfull')) {
+				  //	console.log('1 is not full');
+				  //} else {
+				  //	console.log('1 is full');
+				  //}
+
+    		} else {
+				console.log('err');
+      			console.error(xhr.responseText);
+    		}
+  		}
+	};
+
+	// ip변경
+	xhr.open('GET', 'http://14.42.14.153:3000'); // 메소드와 주소 설정
+	xhr.setRequestHeader('Content-Type', 'application/json');
+	xhr.send(); // 요청 전송 
+
+	// html을 받아서 position 변경
+
+
+	setTimeout(function() {
+
+
+	for( var i=1; i<position.length; i++) {
+		if(position[i][2] == "full") {
+		 	var imageSrc = imageSrc_full;
+		} else {
+			var imageSrc = imageSrc_notfull;	  
+		}
+		var markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize, imageOption),
+    	markerPosition = new kakao.maps.LatLng(position[i][0],position[i][1]); // 마커가 표시될 위치입니다
+		// 마커를 생성합니다
+		var marker = new kakao.maps.Marker({
+  		position: markerPosition,
+  		image: markerImage // 마커이미지 설정 
+		});
+		// 마커가 지도 위에 표시되도록 설정합니다
+		marker.setMap(map); 
+	}
+
+
+	for(var i=0; i<position.length; i++) {
+		var customOverlay = new kakao.maps.CustomOverlay({
+       	 	map: map,
+        	content: '<div style="padding:0 5px;background:#FFF;">' + '<a href="' + position[i][4] +'" target="_blank">' + '<span class="title">'+ position[i][3] +'</span>'  +'</a>' +  '</div>', 
+        	position: new kakao.maps.LatLng(position[i][0], position[i][1]), // 커스텀 오버레이를 표시할 좌표
+        	xAnchor: 0.5, // 컨텐츠의 x 위치
+        	yAnchor: 0 // 컨텐츠의 y 위치
+	  	});
+	}
+
+	var full_list= [];
+	for (var i=1; i<position.length; i++) {
+    	if(position[i][2] == "full") {
+        	full_list.push(position[i]);
+    	}
+	}
+
+	//console.log(full_list);
+
+	var greedy = [];
+	greedy[1] = [37.710216, 126.826349];
+	for(var i=0; i<full_list.length; i++) {
+    	greedy.push(-1);
+	}
+
+	var count =1;
+	while(full_list.length != 0) {
+    	if(count ==1 ) {
+        	var base = [greedy[1][0], greedy[1][1]];
+    	} else {
+        	var base = [full_list[0][0], full_list[0][1]];
+    	}
+    	for(var i = 0; i<full_list.length; i++) {
+        	full_list[i][4] = ((full_list[i][0]-base[0]) * (full_list[i][0]-base[0])) + ((full_list[i][1]-base[1]) * (full_list[i][1]-base[1]));
+    	}
+    	full_list.sort(function(a,b) {
+        	return a[4]-b[4];
+    	});
+    	//console.log(full_list);
+    	if(count==1) {
+    	} else {
+        	greedy[count] = [full_list[0][0],full_list[0][1]];
+        	full_list.shift();
+    	}
+    	count = count+1;
+	}
+
+	//console.log(greedy);
+
+	var linePath = [];
+	for (var i=1; i<greedy.length; i++) {
+		linePath[i] = new kakao.maps.LatLng(greedy[i][0],greedy[i][1]);
+	}
+
+	//linePath = [
+	//	new kakao.maps.LatLng(greedy[0][0],greedy[0][1]),
+    //	new kakao.maps.LatLng(greedy[1][0],greedy[1][1]),
+    //	new kakao.maps.LatLng(greedy[2][0],greedy[2][1])
+	//]
+
+	// 지도에 표시할 선을 생성합니다
+	var polyline = new kakao.maps.Polyline({
+    	path: linePath, // 선을 구성하는 좌표배열 입니다
+    	strokeWeight: 8, // 선의 두께 입니다
+    	strokeColor: '#2EFE2E', // 선의 색깔입니다
+    	strokeOpacity: 0.7, // 선의 불투명도 입니다 1에서 0 사이의 값이며 0에 가까울수록 투명합니다
+    	strokeStyle: 'solid' // 선의 스타일입니다
+	});
+	// 지도에 선을 표시합니다 
+	polyline.setMap(map);  
+
+	}, 500);
+	
+   </script>
+   <P> 관리자 전화번호 : 010-2744-2812 </P>
+
+
+
+</body>
+</html>
