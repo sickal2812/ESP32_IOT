@@ -10,7 +10,7 @@ var AWS = require("aws-sdk");
 let awsConfig = {
     "region": "ap-northeast-2",
     "endpoint": "http://dynamodb.ap-northeast-2.amazonaws.com",
-    "accessKeyId": "AKIA272ZVUOEA5MKP3SK", "secretAccessKey": "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"
+    "accessKeyId": "keys"
 };
 
 var temp = '';
