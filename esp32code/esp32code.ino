@@ -40,7 +40,7 @@ void IRAM_ATTR detectsMovement() {
   lastTrigger = millis();
 }
 
-char HOST_ADDRESS[] = "a3t9ifs8k6ttpj-ats.iot.ap-northeast-2.amazonaws.com";
+char HOST_ADDRESS[] = "awskey-ats.iot.ap-northeast-2.amazonaws.com";
 
 char CLIENT_ID[]= "smart_trash_bucket1"; // ## 1 = 안일훈 2 = 이지원 3 = 전예림 4 = 이효중 ##############
 char sTOPIC_NAME[]= "$aws/things/smart_trash_bucket/shadow/update/delta"; // subscribe topic name
